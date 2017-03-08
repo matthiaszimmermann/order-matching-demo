@@ -39,7 +39,7 @@ public class Participant {
 	 * @param message some debug message
 	 */
 	public void orderExecuted(Order order, int quantity, double price, boolean fullExecution, String message) {
-		System.out.println(message);
+		System.out.println(message + " " + quantity + " " + price);
 	} 
 
 }
