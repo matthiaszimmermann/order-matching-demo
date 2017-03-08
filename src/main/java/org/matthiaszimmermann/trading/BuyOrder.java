@@ -1,15 +1,25 @@
 package org.matthiaszimmermann.trading;
 
-import java.util.Date;
-
+/**
+ * Buy orders for the demo trading platform.
+ */
 public class BuyOrder extends Order {
 	
-	public BuyOrder(String symbol, Date timestamp, int quantity, double price) {
-		super(symbol, timestamp, quantity, price);
+	public BuyOrder(String symbol, int quantity, double price) {
+		super(symbol, quantity, price);
 		type = Type.BUY;
 	}
 
+	/**
+	 * Comparator that sorts buy orders by (1) descending price (2) increasing time stamps. 
+	 */
 	public int compareTo(Order o) {
-		return (int) Math.signum(o.getPrice() - getPrice());
+		int sig = (int) Math.signum(o.getPrice() - getPrice());
+		
+		if(sig != 0) {
+			return sig;
+		}
+		
+		return getTimestamp().compareTo(o.getTimestamp());
 	}
 }
