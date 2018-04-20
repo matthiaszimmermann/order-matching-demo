@@ -3,11 +3,10 @@ package org.matthiaszimmermann.trading;
 /**
  * Buy orders for the demo trading platform.
  */
-public class BuyOrder extends Order {
+public final class BuyOrder extends Order {
 	
 	public BuyOrder(String symbol, int quantity, double price) {
-		super(symbol, quantity, price);
-		type = Type.BUY;
+		super(symbol, quantity, price, Type.BUY);
 	}
 
 	/**
@@ -20,6 +19,6 @@ public class BuyOrder extends Order {
 			return sig;
 		}
 		
-		return getTimestamp().compareTo(o.getTimestamp());
+		return timestamp().compareTo(o.timestamp());
 	}
 }
