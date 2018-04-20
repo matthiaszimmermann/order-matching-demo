@@ -141,11 +141,11 @@ public final class OrderBook {
 	/**
 	 * Handles updating the order book for the specified order and match parameters.
 	 * @param order the order that is to be (partially) executed
-	 * @param matchQuantity the execution quantity
+	 * @param executionQuantity the execution quantity
 	 * @param price the execution price
 	 */
-	private void handleUpdate(Order order, int matchQuantity, double price) {
-		boolean fullExecution = matchQuantity == order.quantity();
+	private void handleUpdate(Order order, int executionQuantity, double price) {
+		boolean fullExecution = executionQuantity == order.quantity();
 		
 		// the full order is executed, remove the order from the order book
 		if(fullExecution) {
@@ -153,11 +153,11 @@ public final class OrderBook {
 		}
 		// partial match, update the remaining quantities
 		else {
-			order.setQuantity(order.quantity() - matchQuantity);
+			order.setQuantity(order.quantity() - executionQuantity);
 		}
 		
 		// owner notification
 		String message = String.format("%s full: %s", order, fullExecution);
-		order.getOwner().orderExecuted(order, matchQuantity, price, fullExecution, message);
+		order.getOwner().orderExecuted(order, executionQuantity, price, fullExecution, message);
 	}
 }
