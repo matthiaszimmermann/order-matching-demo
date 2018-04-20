@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
  * Order book implementation. 
  * Before any trades can be executed buy orders and sell orders need to be put into the order book first. 
  */
-public class OrderBook {
+public final class OrderBook {
 
 	private String symbol;
 	private PriorityQueue<BuyOrder> buyQueue;
@@ -24,7 +24,7 @@ public class OrderBook {
 		return symbol;
 	}
 
-	public void setSymbol(String symbol) {
+	private void setSymbol(String symbol) {
 		this.symbol = symbol;
 	}
 	
@@ -50,7 +50,7 @@ public class OrderBook {
 	public void put(Order order) {
 		order.setTimestamp(new Date());
 		
-		if(order instanceof BuyOrder) {
+		if(order.isBuyOrder()) {
 			buyQueue.add((BuyOrder) order);
 		}
 		else {
@@ -66,7 +66,7 @@ public class OrderBook {
 			return false;
 		}
 		
-		if(order instanceof BuyOrder) {
+		if(order.isBuyOrder()) {
 			buyQueue.remove(order);
 		}
 		else {
@@ -80,7 +80,7 @@ public class OrderBook {
 	 * Checks if the specified order is still in the order book.
 	 */
 	public boolean isPending(Order order) {
-		if(order instanceof BuyOrder) {
+		if(order.isBuyOrder()) {
 			return buyQueue.contains(order);
 		}
 		else {
@@ -130,7 +130,7 @@ public class OrderBook {
 		SellOrder sell = sellQueue.peek();
 		
 		// calculate quantity and price for matching order
-		int quantity = Math.min(buy.getQuantity(), sell.getQuantity());
+		int quantity = Math.min(buy.quantity(), sell.quantity());
 		double price = (buy.getPrice() + sell.getPrice()) / 2.0;
 		
 		// update order book and notify order owners
@@ -141,23 +141,23 @@ public class OrderBook {
 	/**
 	 * Handles updating the order book for the specified order and match parameters.
 	 * @param order the order that is to be (partially) executed
-	 * @param quantity the execution quantity 
+	 * @param matchQuantity the execution quantity
 	 * @param price the execution price
 	 */
-	private void handleUpdate(Order order, int quantity, double price) {
-		boolean fullExecution = quantity == order.getQuantity();
+	private void handleUpdate(Order order, int matchQuantity, double price) {
+		boolean fullExecution = matchQuantity == order.quantity();
 		
 		// the full order is executed, remove the order from the order book
 		if(fullExecution) {
 			remove(order);
 		}
-		// partial match, update the remaining quantitys
+		// partial match, update the remaining quantities
 		else {
-			order.setQuantity(order.getQuantity() - quantity);
+			order.setQuantity(order.quantity() - matchQuantity);
 		}
 		
 		// owner notification
 		String message = String.format("%s full: %s", order, fullExecution);
-		order.getOwner().orderExecuted(order, quantity, price, fullExecution, message);
+		order.getOwner().orderExecuted(order, matchQuantity, price, fullExecution, message);
 	}
 }

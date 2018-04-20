@@ -10,25 +10,40 @@ public abstract class Order implements Comparable<Order> {
 
 	public enum Type { BUY, SELL };
 
-	private UUID id;
+	private final String id;
+	private final Type type;
+	private final String symbol;
+	private final int initialQuantity;
+	private final double price;
+
+	/**
+	 * Set when the order is submitted to the order book
+	 */
+	private Date timestamp;
 	private Participant owner;
+	private int quantity;
 
-	protected Type type;
-	protected String symbol;
-	protected Date timestamp;
-	protected int quantity;
-	protected double price;
-
-	public Order(String symbol, int quantity, double price) {
-		id = UUID.randomUUID();
+	protected Order(String symbol, int quantity, double price, Type type) {
 		this.symbol = symbol;
-		this.timestamp = new Date();
+		this.type = type;
 
 		setQuantity(quantity);
-		setPrice(price);
+
+		if(price <= 0) {
+			throw new IllegalArgumentException("Order price must be positive");
+		}
+		this.price = price;
+
+		initialQuantity = quantity;
+
+		id = type + "-" + UUID.randomUUID();
 	}
 
-	public UUID getId() {
+	public int initialQuantity() { return initialQuantity; }
+
+	public boolean isBuyOrder(){ return type == Type.BUY; }
+
+	public String id() {
 		return id;
 	}
 
@@ -40,19 +55,11 @@ public abstract class Order implements Comparable<Order> {
 		this.owner = owner;
 	}
 
-	public String getSymbol() {
+	public String symbol() {
 		return symbol;
 	}
 
-	public void setSymbol(String symbol) {
-		this.symbol = symbol;
-	}
-
-	public Type getType() {
-		return type;
-	}
-
-	public Date getTimestamp() {
+	public Date timestamp() {
 		return timestamp;
 	}
 
@@ -60,13 +67,13 @@ public abstract class Order implements Comparable<Order> {
 		this.timestamp = timestamp;
 	}
 
-	public int getQuantity() {
+	public int quantity() {
 		return quantity;
 	}
 
 	public void setQuantity(int quantity) {
 		if(quantity <= 0) {
-			throw new IllegalArgumentException("Order quantity must be postive");
+			throw new IllegalArgumentException("Order quantity must be positive");
 		}
 
 		this.quantity = quantity;
@@ -76,18 +83,10 @@ public abstract class Order implements Comparable<Order> {
 		return price;
 	}
 
-	public void setPrice(double price) {
-		if(price <= 0) {
-			throw new IllegalArgumentException("Order price must be postive");
-		}
-
-		this.price = price;
-	}
-
 	@Override
 	public String toString() {
 		String ownerName = owner == null ? "<unk>" : owner.getName();
-		String orderType = type == Type.BUY ? orderType = "BUY" : "SELL";  
+		String orderType = type == Type.BUY ? "BUY" : "SELL";
 
 		return String.format("%s %s %s %d %s %s", ownerName, symbol, orderType, quantity, price, id);
 	}
@@ -99,7 +98,7 @@ public abstract class Order implements Comparable<Order> {
 		}
 
 		if (obj instanceof Order) {
-			UUID thatOrder = ((Order) obj).getId();
+			String thatOrder = ((Order) obj).id();
 			return id.equals(thatOrder);
 		}
 
